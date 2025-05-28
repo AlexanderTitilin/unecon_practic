@@ -9,6 +9,7 @@ class CopyModel():
         self.graph = self.generate_complete_graph()
         self.start_verticies = list(range(1, d+1))
         self.i = 0
+        self.j = self.graph.k_vertecies()
         self.nxt = d+2
 
     def generate_complete_graph(self):
@@ -19,11 +20,11 @@ class CopyModel():
         return g
 
     def add_vertex(self):
-        for _ in range(self.d):
-            p = choice(self.start_verticies)
+        v = self.j + 1
+        self.j+=1
+        p = choice(self.start_verticies)
+        for i in range(self.d):
             if random() < self.alpha:
-                self.graph.add_edge(p, self.nxt)
+                self.graph.add_edge(p, v)
             else:
-                self.graph.add_edge(list(self.graph.neib(p))[self.i], self.nxt)
-            self.nxt += 1
-            self.i =  (self.i + 1) % len(self.start_verticies)
+                self.graph.add_edge(list(self.graph.neib(p))[i], v)

@@ -6,8 +6,6 @@ from random import choice
 class ChungLiModel:
     def __init__(self, d: [int]):
         self.d = d
-        # if sum(d) % 2 != 0:
-        #     raise Exception()
         self.l_set = []
         for i, elem in enumerate(d, 1):
             for _ in range(elem):
