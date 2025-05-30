@@ -1,0 +1,336 @@
+\section{ГРАФЫ. ОСНОВНЫЕ ОПРЕДЕЛЕНИЯ. РЕАЛИЗАЦИЯ  АЛГОРИТМОВ. ПОДСЧЕТ ХАРАКТЕРИСТИК ГРАФА.}
+\subsection{Основные определения}
+Для того, чтобы реализовать граф, необходимо 
+дать определение данного понятия. 
+Пусть задано конечное множество вершин $V = \{v_1 \dots v_{n}\}$
+и множество ребер $E = \{e_{1} \dots e_{m}\}$,
+где $e_{k} = \{v_{i},v_{j}\}$. Пару $G = (V,E)$ назовем графом.
+Если  $E = \{e_1^{i_1} \dots e_{m}^{i_{k}}\}$ мультимножество ребер,
+то это мультиграф. Две вершины $v_1,v_2 \in V$ называются
+смежными, если $\{e_1,e_2\} \in E$.
+\subsection{Реализация графа.}
+Рассмотрим реализацию графов с помощью языка программирования Python.
+Был создан пакет <<graph\_lib>>, который содержит
+реализованные классы для представления графа, визуализации и 
+генерации случайных графов.
+
+Класс <<Graph>> для реализации графа содержится в модуле <<graph.py>>.
+Рассмотрим поля данного класса:
+\begin{enumerate}
+    \item \_adjacency\_list -- список смежности графа. Представлен с
+        помощью словаря, в котором ключи -- это вершины,
+        а значения -- это множества вершин, которым данная вершина смежна;
+    \item \_verticies -- множество вершин графа;
+    \item \_k\_edges -- количество ребер в графе;
+\end{enumerate}
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def __init__(self):
+        self._adjacency_list = defaultdict(set)
+        self._vertecies = set()
+        self._k_edges = 0
+\end{lstlisting}  
+    \caption{Инициализация графа.}
+    \label{sec:initgraph}
+\end{figure} 
+На рисунке \ref{sec:initgraph} представлена функции 
+инициализации пустого графа.
+Добавление ребра определяется следущим образом:
+\begin{equation}
+    (V,G) \to (V \cup \{v,u\}, E \cup \{\{v,u\}\})
+    \label{sec : gf_1}
+\end{equation} 
+Формула \ref{sec : gf_1} легко переносится
+на язык программирования Python
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def add_vertex(self, vertex):
+        self._vertecies.add(vertex)
+\end{lstlisting}  
+    \caption{Добавления вершины в граф.}
+    \label{sec:add_1}
+\end{figure} 
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def add_edge(self, a, b):
+        self._adjacency_list[a].add(b)
+        self._adjacency_list[b].add(a)
+        self.add_vertex(a)
+        self.add_vertex(b)
+        self._k_edges += 1
+\end{lstlisting}  
+    \caption{Добавление ребра в граф.}
+    \label{sec:add_2}
+\end{figure} 
+На рисунках \ref{sec:add_1}, \ref{sec:add_2}
+приведены методы, которые добавляют в граф вершину и ребро.
+Данные методы обобщаются на список вершин или ребер.
+\subsection{Реализация алгоритмов на графах.}
+Для успешного анализа графов необходимо реализовать
+некоторые базовые алгоритмы. 
+Рассмотрим алгоритмы обхода графа. Начнем с поиска в ширину.
+\begin{figure}[H] 
+    \begin{algorithmic}
+        \State $Q \gets \{s\}$ 
+        \State visited$= \emptyset$
+        \While $~Q \neq \emptyset$ 
+        \State $v = \text{pop}(Q)$
+        \State yield $v$
+        \For $ ~\{u,v\}$ in $E$
+        \If $~u \notin \text{visited}$ 
+        \State $\text{push}(Q,u)$
+        \State $\text{visited} = \text{visited} \cup \{v_1\}$
+        \EndIf
+        \EndFor
+        \EndWhile
+    \end{algorithmic}
+    \caption{Псевдокод алгоритма обхода в ширину.}
+    \label{psbfs}
+\end{figure} 
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def bfs(self, start=1):
+        if len(self._vertecies) > 0:
+            visited = {start}
+            queue = deque([start])
+            while queue:
+                a = queue.popleft()
+                yield a
+                for b in self._adjacency_list[a]:
+                    if b not in visited:
+                        visited.add(b)
+                        queue.append(b)
+\end{lstlisting}  
+    \caption{Реализация обхода в ширина на языке программирования Python.}
+    \label{sec:bfspy}
+\end{figure} 
+На рисунках \ref{psbfs} , \ref{sec:bfspy}
+приведен алгоритм обхода графа в ширину
+
+Данный алгоритм будет использоваться для поиска кратчайших путей в графе
+и поиске компонент связности.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def dist(self, v, g):
+        d = defaultdict(lambda: None)
+        d[v] = 0
+        for u1 in self.bfs(v):
+            for u2 in self.neib(u1):
+                if d[u2] is None:
+                    d[u2] = d[u1] + 1
+        return d[g]
+\end{lstlisting}  
+    \caption{Поиск кратчашего растояния между $v$ и  $g$}
+    \label{mindist}
+\end{figure} 
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def connected_components(self):
+        visited = set()
+        components = []
+        for v in self.verticies():
+            if v not in visited:
+                component = []
+                for u in self.bfs(v):
+                    visited.add(u)
+                    component.append(u)
+                components.append(component)
+        return components
+\end{lstlisting}  
+    \caption{Поиск компонент связности.}
+    \label{concomp}
+\end{figure} 
+На рисунках \ref{mindist}, \ref{concomp}
+представлены методы, которые используют поиск в ширину.
+
+Так же аналогично реализован поиск в глубину и алгоритм
+поиска мостов, основанный на нем.
+\subsection{Вычисление характеристик графа}
+Были разработаны методы 
+для вычисления следущих характеристик графа:
+\begin{enumerate}
+    \item плотность сети;
+    \item диаметр графа;
+    \item cреднее кратчайшее расстояние;
+    \item коэффициент кластеризации;
+    \item локальный коэффициент кластеризации;
+    \item средний коэффициент кластеризации;
+    \item распределние степеней вершин;
+    \item степень близости вершины;
+\end{enumerate}
+Рассмотрим каждую характеристику более подробно
+\subsubsection{Плотность сети}
+Плотность сети -- отношение количества ребер к
+максимально возможному, $\frac{n (n-1)}{2}$, где $n$ -- количество вершин графа.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def density(self):
+        max_edges = self.k_vertecies() * (self.k_vertecies() - 1) // 2
+        return self._k_edges / max_edges
+\end{lstlisting}  
+    \caption{Метод для вычисления плотности графа.}
+    \label{densg}
+\end{figure} 
+На рисунке \ref{densg} представлен метод 
+для вычисления плотности сети.
+\subsubsection{Диаметр графа}
+Диаметр графа -- максимальное расстояние между парами вершин.
+Вычисляется следущим образом, необходимо 
+пройти из каждой вершины поиском в ширину, выбрать вершину,
+обход из которой пометил больше всего вершин.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def diameter(self):
+        diam_lst = [len(tuple(self.bfs(v))) - 1 for v in self._vertecies]
+        return max(diam_lst)
+\end{lstlisting}  
+    \caption{Реализация вычисления диаметра графа.}
+    \label{grdiam}
+\end{figure} 
+На рисунке \ref{grdiam} представлен метод для вычисления диаметра графа.
+\subsubsection{Коэффициенты кластеризации}
+Введем следущие понятия:
+\begin{enumerate}
+    \item треугольник -- граф состоящий из 3 вершин, степень каждой 2;
+    \item вилка -- граф состоящий из 3 вершин, степень двух вершин 1,
+        другой 2. Вершина степени 2 называется центром вилки;
+\end{enumerate}
+Рассмотрим коээициенты кластеризации:
+\begin{enumerate}
+    \item коэффициент кластеризации $\frac{3 \cdot \text{количество треугольников в графе}}{\text{количество вилок в графе}}$;
+     \item локальный коэффициент кластеризации для
+         вершины $v$ --\\  $\frac{\text{число треугольников с вершиной~} v}{\text{число вилок с центром } v}$;
+    \item средний коэфициент кластеризации -- среднее арифметическое 
+        локальных коэффициентов кластеризации;
+\end{enumerate}
+Для вычисления данных коэффициентов нужно
+реализовать методы поиска числа вилок и треугольников
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def k_triangles(self):
+        triplets = set()
+        k = 0
+        for v in self._vertecies:
+            if self.deg(v) >= 2:
+                for v1 in self.neib(v):
+                    for v2 in self.neib(v):
+                        triplet = frozenset((v, v1, v2))
+                        if self.has_edge(v1, v2) and triplet not in triplets:
+                            k += 1
+                            triplets.add(triplet)
+        return k
+\end{lstlisting}  
+    \caption{Вычисление количества треугольников в графе.}
+    \label{trg1}
+\end{figure} 
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def k_local_triangles(self, v):
+        k = 0
+        if self.deg(v) >= 2:
+            for v1 in self.neib(v):
+                for v2 in self.neib(v):
+                    if v1 < v2 and self.has_edge(v1, v2):
+                        k += 1
+        return k
+\end{lstlisting}  
+    \caption{Вычисление количества треугольников,
+    содержащих вершину $v$.}
+    \label{trg2}
+\end{figure} 
+На рисунках \ref{trg1} , \ref{trg2} 
+представлены методы для вычисления числа треугольников 
+в графе.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def k_local_forks(self, v):
+        k = 0
+        if self.deg(v) >= 2:
+            for v1 in self.neib(v):
+                for v2 in self.neib(v):
+                    if v1 < v2 and not self.has_edge(v1, v2):
+                        k += 1
+        return k
+\end{lstlisting}  
+    \caption{Вычисление вилок с центром в вершине $v$}
+    \label{fork_1}
+\end{figure} 
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def k_forks(self):
+        k = 0
+        for v in self._vertecies:
+            k += self.k_local_forks(v)
+        return k
+\end{lstlisting}  
+    \caption{Вычисление числа вилок в графе}
+    \label{fork_2}
+\end{figure} 
+На рисунках \ref{fork_1}, \ref{fork_2}
+представлены методы для вычисления числа вилок.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def cluster_k(self):
+        if self.k_forks() == 0:
+            return 0
+        return 3 * self.k_triangles() / self.k_forks()
+\end{lstlisting}  
+    \caption{Вычисление коэффициента кластеризации.}
+    \label{cluster_1}
+\end{figure} 
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def local_cluster_k(self, v):
+        if self.k_local_forks(v) > 0:
+            return self.k_local_triangles(v) / self.k_local_forks(v)
+        return 0
+\end{lstlisting}  
+    \caption{Вычисление локального коэффициента кластеризации.}
+    \label{cluster_2}
+\end{figure} 
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def mean_cluster_k(self):
+        return sum(self.local_cluster_k(v) for v in self._vertecies) / self.k_vertecies()
+\end{lstlisting}  
+    \caption{Вычисление среднего коэффициента кластеризации}
+    \label{cluster_3}
+\end{figure} 
+На рисунках \ref{cluster_1},\ref{cluster_2},\ref{cluster_3}
+представлены методы для вычисления коэффициентов кластеризации.
+\subsubsection{Распределение степеней.}
+Необходимо для всех степеней вершин найти долю вершин,
+которые имеют данную степень.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def deg_distribution(self):
+        result = []
+        t = namedtuple("DegDistrNode", ("k", "p"))
+        for d in set(self.deg_list()):
+            k_d = len([1 for v in self.verticies() if self.deg(v) == d])
+            result.append(t(d, k_d/self.k_vertecies()))
+        return result
+\end{lstlisting}  
+    \caption{Вычисление распределения степеней.}
+    \label{degdistr}
+\end{figure} 
+На рисунке \ref{degdistr}  приведен метод для вычисления
+распределения степеней.
+\subsubsection{Степень близости.}
+Степень близости вершины $v$  --  $C(v) = \frac{n - 1}{\sum_{u} d(u,v)}$ 
+где $n$ -- количество вершин в графе,  $d(u,v)$ -- 
+кратчайшее расстояние от  $u$ до  $v$.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def closeness(self, v):
+        d = [self.dist(v, u)
+             for u in self.verticies() if self.dist(v, u) is not None]
+        if sum(d) == 0:
+            return 0
+        return (self.k_vertecies() - 1) / sum(d)
+\end{lstlisting}  
+    \caption{Вычисление степени близости вершины $v$.}
+    \label{closeg}
+\end{figure} 
+На рисунке \ref{closeg} приведен метод для вычисления степени
+близости вершины $v$.

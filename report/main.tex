@@ -1,0 +1,80 @@
+\documentclass[14pt]{extarticle}
+\usepackage{fontspec}
+\usepackage[russian]{babel}
+\setmainfont{Times New Roman}
+\usepackage{amssymb}
+\usepackage{setspace}
+\usepackage{enumitem}
+\onehalfspacing
+\usepackage{amsmath}
+\usepackage{titlesec} 
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pdfpages}
+\usepackage{url}
+\urlstyle{same}
+\usepackage{longtable}
+\usepackage{titlesec}
+\usepackage{indentfirst}
+% \usepackage[backend=biber, style=numeric,sorting=none,natbib=false]{biblatex}
+\captionsetup[figure]{name=Рисунок}
+% \DeclareFieldFormat{labelnumberwidth}{#1\adddot}
+% \DeclareFieldFormat{urldate}{(дата обращения\space#1)}
+% \DeclareFieldFormat{title}{#1\addcolon}
+% \setlength{\biblabelsep}{5pt}
+% \addbibresource{bibl.bib}
+% \bibliography{sample}
+\setcounter{page}{2} 
+\setlength{\parindent}{1.25cm}
+\usepackage[right=10mm,left=30mm,top=20mm,bottom=20mm]{geometry}
+\titleformat{\section} {\normalfont\Large\bfseries}{\thesection. }{0em}{\centering} 
+\titleformat{\subsection } {\normalfont\Large\bfseries}{\thesubsection }{0.5em}{\centering} 
+\titleformat{\subsubsection } {\normalfont\Large\bfseries}{\thesubsubsection }{0.5em}{\centering} 
+\setlist[enumerate,1]{label=\arabic*)}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5} \definecolor{codepurple}{rgb}{0.58,0,0.82} \definecolor{backcolour}{rgb}{0.95,0.95,0.92} \lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+    basicstyle=\fontspec{JetBrains Mono}\fontsize{8}{10}\selectfont,
+    keepspaces=true,
+	breaklines=true,
+	captionpos=b,
+	breakatwhitespace=false,
+	breaklines=true,
+	captionpos=b,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+\DeclareMathOperator{\extr}{extr}
+\DeclareMathOperator{\dist}{dist}
+\newtheorem{definition}{Определение}
+\title{}
+\author{}
+\date{}
+\setcounter{page}{2}
+\begin{document}
+\includepdf[pages=1]{titilin_iz.pdf}
+\includepdf[pages=2]{titilin_iz.pdf}
+\includepdf[pages=3]{titilin_iz.pdf}
+\tableofcontents{}
+\addcontentsline{toc}{section}{ВВЕДЕНИЕ}
+\include{introduction.tex}
+\include{graph.tex}
+\include{visualisation.tex}
+\include{rnd_gen.tex}
+\end{document}
