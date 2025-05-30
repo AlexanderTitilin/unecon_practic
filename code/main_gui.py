@@ -12,6 +12,7 @@ from copy_widget import CopyWidget
 from search_widgets import BFSWidget, DFSWidget
 from chung_widget import ChungLiWidget
 from create_graph_widget import CreateGraphWidget
+from geo_widget import GeoWidget
 from matplotlib.figure import Figure
 
 
@@ -28,6 +29,7 @@ class MainWidget(QtWidgets.QWidget):
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.tabs = QtWidgets.QTabWidget(self)
         self.crt = CreateGraphWidget()
+        self.geo = GeoWidget()
         self.erd = ErdosWidget()
         self.lcd = LCDWidget()
         self.bar = BarabashiWidget()
@@ -37,6 +39,7 @@ class MainWidget(QtWidgets.QWidget):
         self.bfs = BFSWidget()
         self.dfs = DFSWidget()
         self.tabs.addTab(self.crt, "Создание графа")
+        self.tabs.addTab(self.geo, "Геометрический граф")
         self.tabs.addTab(self.erd, "Модель Эрдеша-Ренье")
         self.tabs.addTab(self.lcd, "Модель LCD")
         self.tabs.addTab(self.bar, "Модель Барабаши-Альберт")
@@ -47,7 +50,7 @@ class MainWidget(QtWidgets.QWidget):
         self.tabs.addTab(self.dfs, "Поиск в глубину")
         self.mainLayout.addWidget(self.tabs)
 
-        for widget in [self.crt, self.erd, self.lcd, self.bar, self.bol, self.copy, self.chungLi, self.bfs, self.dfs]:
+        for widget in [self.crt, self.geo, self.erd, self.lcd, self.bar, self.bol, self.copy, self.chungLi, self.bfs, self.dfs]:
             for btn in widget.findChildren(QtWidgets.QPushButton):
                 btn.setSizePolicy(QtWidgets.QSizePolicy.Fixed,
                                   QtWidgets.QSizePolicy.Fixed)

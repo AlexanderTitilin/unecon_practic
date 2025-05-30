@@ -21,6 +21,7 @@ class Node:
         return sqrt((self.x - other.x) ** 2 + (self.y - other.y)**2)
 
 
+
 class GeoGraph(Graph):
     def __init__(self):
         super().__init__()

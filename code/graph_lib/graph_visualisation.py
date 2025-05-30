@@ -60,7 +60,10 @@ class GraphPlotter:
         for v in self.graph.verticies():
             x, y = self.coords[v]
             color = "red" if v in self.graph.neib(v) else "blue"
-            ax.scatter(x, y, c=[color], s=10 if color == "blue" else 100)
+            if type(self.graph) is GeoGraph:
+                ax.scatter(x, y, c=["blue"], s=100)
+            else:
+                ax.scatter(x, y, c=[color], s=10 if color == "blue" else 100)
             for g in self.graph.neib(v):
                 x2, y2 = self.coords[g]
                 ax.plot([x, x2], [y, y2],
@@ -70,7 +73,9 @@ class GraphPlotter:
                     if v >= g:
                         ax.text(c1, c2, self.graph.count_edges(
                             v, g), va="top", fontsize=20)
-            ax.text(x, y, v, va='bottom', fontsize=14)
             if type(self.graph) is not GeoGraph:
                 ax.text(x, y, v, va='bottom', fontsize=14)
-        ax.axis("off")
+        if type(self.graph) is GeoGraph:
+            ax.grid(visible=True)
+        else:
+            ax.axis("off")
