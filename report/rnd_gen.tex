@@ -1,7 +1,7 @@
 \section{ГЕНЕРАЦИЯ СЛУЧАЙНЫХ ГРАФОВ}
 Для многих задач требуется генерация 
 случайного графа. Будут рассмотрены 
-разные модели генерации случайного графа. Каждая 
+разные модели генерации случайного графа \cite{rnd}. Каждая 
 модель представлена отдельным модулем.
 \subsection{Модель Эрдеша-Ренье}
 Рассмотрим простейшую модель генерации случайного графа. 
@@ -126,6 +126,114 @@ c помощью модели Боллобаша-Риодана.
     \label{br_2}
 \end{figure} 
 На рисунке \ref{br_2} изображен граф построенный согласно данной модели.
+\subsection{Модель Боллобаша-Риодана для создания ориентированного графа}
+Рассмотрим следущую модель генерации случайного ориентированного графа \cite{bolor}. Пусть даны неотрицательные вещественные числа 
+$\alpha,\beta,\gamma,\delta_{\text{in}},\delta_{\text{out}}$, где
+$\alpha + \beta + \gamma = 1$ и ориентированный граф  $G(1)$.
+Будет создаваться последовательность $G(1),G(2),\dots, G(t),G(t+1) \dots G(n)$, где следущий граф строится по предыдущему.
+Пусть вершина  $v \in V(t)$ выбирается согласно $d_{\text{in}} + \delta_{\text{in}}$, если 
+вероятность выбора этой вершин из $V(t)$ равна  $\frac{d_{\text{in}}(v) +\delta_{\text{in}}}{t + \delta_{\text{in}} \cdot |V(t)|}$,
+выбирается согласно $d_{\text{out}} + \delta_{\text{out}}$ 
+если вероятность выбора данной вершины из $V(t)$ равна 
+$\frac{d_{\text{out}}(v) +\delta_{\text{out}}}{t + \delta_{\text{out}} \cdot |V(t)|}$, где $d_{\text{in}}(v)$ -- полустепень захода вершины $v$, $d_{\text{out}}(v)$ -- полустепень исхода вершины $v$.
+
+Граф $G(t+1)$ строится согласно следущему правилу:
+ \begin{enumerate}
+    \item с вероятностью $\alpha$ добавляется ребро  $(v,w)$,
+        где  $v$ новая вершина,  $w$ вершина выбранная согласно  $d_{\text{in}} + \delta_{\text{out}}$ ;
+    \item с вероятностью $\beta$ добавляется ребро  $(v,w)$,
+        где вершина  $v$ добавляется согласно  $d_{\text{out}} + \delta_{\text{out}}$, вершина $w$ выбирается согласно  $d_{\text{in}} + \delta_{\text{in}}$;
+     \item с вероятностью $\gamma$ добавляется ребро  $(v,w)$,
+         где  $v$ новая вершина,  $w$ выбирается согласно 
+         $d_{\text{out}} + \delta_{\text{out}}$ ;
+\end{enumerate}
+Рассмотрим реализацию данного алгоритма.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def d_in_p(self, v):
+        return (self.graph.in_deg(v) + self.d_in) / (self.t + self.d_in * self.graph.k_vertecies())
+
+    def d_out_p(self, v):
+        return (self.graph.out_deg(v) + self.d_in) / (self.t + self.d_out * self.graph.k_vertecies())
+
+    def rnd_in(self):
+        probs_in = [self.d_in_p(v) for v in self.graph.verticies()]
+        return choices(list(self.graph.verticies()),
+                       weights=probs_in, k=1)[0]
+
+    def rnd_out(self):
+        probs_out = [self.d_out_p(v) for v in self.graph.verticies()]
+        return choices(list(self.graph.verticies()),
+                       weights=probs_out, k=1)[0]
+\end{lstlisting}  
+    \caption{Получение случайных вершин графа}
+    \label{orrnd_1}
+\end{figure} 
+На рисунке \ref{orrnd_1} приведен код для получения вершин 
+графа согласно $d_{\text{in}} + \delta_{\text{in}}$ и $d_{\text{out}} +
+\delta_{\text{out}}$
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def add_vertex(self):
+        p = random()
+        if p < self.alpha:
+            v = self.nxt
+            self.nxt += 1
+            w = self.rnd_in()
+            self.graph.add_edge(v, w)
+        if p < self.beta:
+            v = self.rnd_in()
+            w = self.rnd_out()
+            self.graph.add_edge(v, w)
+        if p < self.gamma:
+            w = self.nxt
+            self.nxt += 1
+            v = self.rnd_out()
+            self.graph.add_edge(v, w)
+        self.t += 1
+\end{lstlisting}  
+    \caption{Добавление вершины в граф согласно данной модели}
+    \label{orrnd_2}
+\end{figure} 
+На рисунке \ref{orrnd_2} приведена реализация добавления вершины 
+в ориентированный граф.
+\begin{figure}[H] 
+    \includegraphics{or1.pdf} 
+    \caption{Пример графа созданного с помощью данной модели}
+    \label{orrnd_3}
+\end{figure} 
+На рисунке \ref{orrnd_3} приведена диаграмма графа созданного с помощью данной модели,
+где $\alpha = 0.4,\beta = 0.4,\gamma =0.2, \delta_{\text{in}} = 2, \delta_{\text{out}} = 2$.
+\subsection{Модель Бакли-Остхус}
+Рассмотрим следущую \cite{buck} модификацию модели Боллобаша-Риодана. 
+Дан граф с одной вершиной и петлей и параметр $a$. 
+На  $i+1$-том шаге  вершина $i+1$ добавляется в граф, из нее 
+проводится ребро в случайную вершину, которая выбирается со следушей вероятностью $P_{k,i+1} = \frac{\deg{k} + a }{(a+1)*(i+1) - 1}$,
+$P_{i+1,i+1} = \frac{a}{(a+1)(i+1) - 1}$.
+
+Рассмотрим реализацию данной модели.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def add_edge(self):
+        p = [(self.graph.deg(v) + self.a) / ((self.a+1) *
+                                             (self.graph.k_vertecies() + 1) - 1) for v in self.graph.verticies()]
+        p.append(self.a / ((self.a+1) * (self.graph.k_vertecies() + 1)-1))
+        self.graph.add_vertex(self.nxt)
+        v = choices(list(self.graph.verticies()), weights=p, k=1)[0]
+        self.graph.add_edge(self.nxt, v)
+        self.nxt += 1
+\end{lstlisting}  
+    \caption{Добавление вершины в граф}
+    \label{os_1}
+\end{figure} 
+На риснуке \ref{os_1} представлен метод, реализующий добавление 
+вершины в граф, согласно модели Бакли-Остхус.
+\begin{figure}[H] 
+    \includegraphics[scale=0.8]{os.pdf} 
+    \caption{Пример графа, созданного с помощью модели Бакли-Остхус с параметром $a=2$}
+    \label{os_2}
+\end{figure} 
+На рисунке \ref{os_2} представлен пример результата работы данной модели.
 \subsection{Модель LCD}
 Рассмотрим алгоритм генерации графа с помощью линейной хордовой
 диаграммы (LCD):
@@ -208,8 +316,8 @@ LCD алгоритма
  На рисунке \ref{cop1} приведен метод 
 добавления вершин в граф, согласно модели копирования.
 \begin{figure}[H] 
-    \includegraphics{cop1.pdf} 
-    \includegraphics{cop2.pdf} 
+    \includegraphics[scale=0.8]{cop1.pdf} 
+    \includegraphics[scale=0.8]{cop2.pdf} 
     \caption{Результат добавления двух вершин в граф 
     с параметрами $d = 4,\alpha = 0.1$ согласно модели копирования.}
     \label{cop2}
@@ -257,6 +365,38 @@ LCD алгоритма
 \end{figure} 
 Пример случайного мультиграфа, полученного согласно данно модели
 приведен на рисунке \ref{ch2}.
+\subsection{Модель Янсона-Лучака}
+Рассмотрим набор вершин $v = \{v_1 \dots v_{n}\}$ и набор весов
+$W = \{W_1 \dots W_{n}\}$.  Пусть
+$\lambda_{ij} = \frac{W_{i} W_{j} }{n}$ -- математическое 
+ожидание случайной величины $E_{ij}$, имеющей Пуассоновское распределение. Для вершин $i,j$ строится  $E_{ij}$ кратных ребер.
+Получившийся мультиграф можно преобразовать в граф,
+путем стягивания кратных ребер.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def gen_graph(self):
+        rng = np.random.default_rng()
+        graph = MultiGraph()
+        for (u, v) in combinations(range(1, len(self.weights)+1), 2):
+            lamb = (self.weights[u-1]*self.weights[v-1]) / len(self.weights)
+            for _ in range(int(lamb)):
+                graph.add_edge(u,v)
+            graph.add_vertecies((u,v))
+        self.graph = graph
+\end{lstlisting}  
+    \caption{Генерация случайного графа согласно модели Янсона-Лучака.}
+    \label{jason_1}
+\end{figure} 
+На рисунке \ref{jason_1} приведена реализация алгоритма 
+создания случайного графа, согласно модели Янсона-Лучака.
+Для генерации случайной величины используется библиотека <<numpy>> \cite{numpy}.
+\begin{figure}[H] 
+    \includegraphics{jason.pdf} 
+    \caption{Пример графа, созданного согласно модели Янсона-Лучака}
+    \label{jason_2}
+\end{figure} 
+На рисунке \ref{jason_2} изображен граф, который был создан с 
+помощью модели Янсона-Лучака, $w = \{2,2,3,1,3,2\} $.
 \subsection{Генерация случайного геометрического графа}
 Назовем граф $G(n,R)$ случайным геометрическим 
 графом, если он получен путем размещения
@@ -272,7 +412,7 @@ LCD алгоритма
 $\Omega_{ij} = \{(L_{kl} \mid  k \in -2 \dots 2, n \in -2 \dots 2 , 
 0 \le  |k| + |m| < 3\}$ псевдоокрестностью $L_{ij}$
 Рассмотрим следущий алгоритм генерации случайных
-геометрических графов :
+геометрических графов \cite{geo} :
 \begin{enumerate}
     \item в каждой ячейке создается случайная вершина;
     \item для $i,j$ вершины создаются ребра смежные

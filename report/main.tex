@@ -16,6 +16,8 @@
 \usepackage{xcolor}
 \usepackage{float}
 \usepackage{graphicx}
+\usepackage{caption}
+\captionsetup[table]{justification=raggedright, singlelinecheck=false}
 \usepackage{tikz}
 \usepackage{pdfpages}
 \usepackage{url}
@@ -23,14 +25,14 @@
 \usepackage{longtable}
 \usepackage{titlesec}
 \usepackage{indentfirst}
-% \usepackage[backend=biber, style=numeric,sorting=none,natbib=false]{biblatex}
+\usepackage[backend=biber, style=numeric,sorting=none,natbib=false]{biblatex}
 \captionsetup[figure]{name=Рисунок}
-% \DeclareFieldFormat{labelnumberwidth}{#1\adddot}
-% \DeclareFieldFormat{urldate}{(дата обращения\space#1)}
-% \DeclareFieldFormat{title}{#1\addcolon}
-% \setlength{\biblabelsep}{5pt}
-% \addbibresource{bibl.bib}
-% \bibliography{sample}
+\DeclareFieldFormat{labelnumberwidth}{#1\adddot}
+\DeclareFieldFormat{urldate}{(дата обращения\space#1)}
+\DeclareFieldFormat{title}{#1\addcolon}
+\setlength{\biblabelsep}{5pt}
+\addbibresource{bibl.bib}
+\bibliography{sample}
 \setcounter{page}{2} 
 \setlength{\parindent}{1.25cm}
 \usepackage[right=10mm,left=30mm,top=20mm,bottom=20mm]{geometry}
@@ -77,4 +79,10 @@
 \include{graph.tex}
 \include{visualisation.tex}
 \include{rnd_gen.tex}
+\include{gui.tex}
+\include{clustering.tex}
+\include{conclusion.tex}
+\pagebreak
+\printbibliography[title=БИБЛИОГРАФИЧЕСКИЙ СПИСОК]
+\addcontentsline{toc}{section}{БИБЛИОГРАФИЧЕСКИЙ СПИСОК}
 \end{document}

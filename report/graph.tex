@@ -70,24 +70,6 @@
 некоторые базовые алгоритмы. 
 Рассмотрим алгоритмы обхода графа. Начнем с поиска в ширину.
 \begin{figure}[H] 
-    \begin{algorithmic}
-        \State $Q \gets \{s\}$ 
-        \State visited$= \emptyset$
-        \While $~Q \neq \emptyset$ 
-        \State $v = \text{pop}(Q)$
-        \State yield $v$
-        \For $ ~\{u,v\}$ in $E$
-        \If $~u \notin \text{visited}$ 
-        \State $\text{push}(Q,u)$
-        \State $\text{visited} = \text{visited} \cup \{v_1\}$
-        \EndIf
-        \EndFor
-        \EndWhile
-    \end{algorithmic}
-    \caption{Псевдокод алгоритма обхода в ширину.}
-    \label{psbfs}
-\end{figure} 
-\begin{figure}[H] 
 \begin{lstlisting}[language=Python] 
     def bfs(self, start=1):
         if len(self._vertecies) > 0:
@@ -104,8 +86,8 @@
     \caption{Реализация обхода в ширина на языке программирования Python.}
     \label{sec:bfspy}
 \end{figure} 
-На рисунках \ref{psbfs} , \ref{sec:bfspy}
-приведен алгоритм обхода графа в ширину
+На рисунке, \ref{sec:bfspy}
+приведена  реализация алгоритма обхода графа в ширину
 
 Данный алгоритм будет использоваться для поиска кратчайших путей в графе
 и поиске компонент связности.
@@ -334,3 +316,139 @@
 \end{figure} 
 На рисунке \ref{closeg} приведен метод для вычисления степени
 близости вершины $v$.
+\subsection{Поиск максимальной клики графа}
+Кликой в графе $G = (V,E)$ называется такое подмножество  его вершин,
+$C \subset V$, что $\forall u,v , u \neq v \in C : (u,v) \in E$.
+Максимальной кликой называется такая клика, которая
+не содержится в клике большего размера.
+
+Задача поиска
+максимальных клик, является NP-полной. Поэтому будет 
+рассмотрен следущий приблизительный алгоритм поиска
+максиальных клик \cite{clique}
+
+\begin{enumerate}
+    \item иницируется начальная клика, состоящая из одной вершины;
+    \item если есть вершины, которые можно добавить в клику, то добавляется лучшая;
+    \item если таких нет, то удаляется лучшая;
+\end{enumerate}
+
+Данный алгоритм выполняется требуемое число шагов,
+максимальной кликой, является полученная клика наибольшего размера.
+Определим понятие лучшей вершины. Назовем множеством
+кандидатов, такое подмножество вершин графа, что
+вершины не входят в клику, но имеют ребро с каждой вершиной из клики.
+Лучшим кандидатом для добалвения клику является та вершина из 
+множества кандидатов, которая имеет наибольшее число ребер с
+другими вершинами из множетсва кандидатов. 
+Лучшей вершиной для удаления является та вершина, у которой 
+наименьшее число соседей из множества таких вершин,
+которые не входят в клику и имееют на одно ребро меньше чем вершин в клике.
+
+Теперь рассмотрим реализацию данного алгоритма на языке программирования
+Python. Был создан класс <<MaxClique>> который при инициализации,
+получается граф и начальную клику. Были разработаны следущие методы
+\begin{enumerate}
+    \item  <<candidates>> -- создает список кандидатов для
+        добавления в текущую клику;
+    \item <<best\_candidate>> -- возвращает лучшую вершину для добавления;
+    \item <<add\_best>> -- добавляет в клику лучшую вершину;
+    \item <<one\_missing>> -- возвращает список для определния лучшей
+        вершины для удаления;
+    \item <<best\_for\_delete>> -- возвращает лучшую вершину для удаления
+    \item <<delete\_best>> -- удаляет лучшую вершину;
+    \item <<step>> -- выполняет шаг алгоритма;
+    \item <<find\_clique>> -- возвращает найденную максимальную клику;
+\end{enumerate}
+
+Рассмотрим каждый метод более подробно. 
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def __init__(self, g: Graph, start):
+        self.graph = g
+        self.clique = start
+\end{lstlisting}  
+    \caption{Инициализация объекта типа <<МaxClique>>.}
+    \label{mxcl_1}
+\end{figure} 
+На рисунке \ref{mxcl_1} приведена инициализация объекта для поиска
+максимальной клики.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def candidates(self):
+        candidates = set()
+        for v in self.graph.verticies():
+            f = True
+            if v not in candidates:
+                for u in self.clique:
+                    if not self.graph.has_edge(u, v):
+                        f = False
+                        break
+                if f:
+                    candidates.add(v)
+        return candidates
+
+    def best_candidate(self):
+        candidates = self.candidates()
+        d = dict()
+        for v in candidates:
+            d[v] = sum(1 for u in candidates if self.graph.has_edge(u, v))
+        return max(d)
+
+    def add_best(self):
+        self.clique.add(self.best_candidate())
+\end{lstlisting}  
+    \caption{Реализация методов <<candidates>>,<<best\_candidate>>,<<add\_best>>}
+    \label{mxcl_2}
+\end{figure} 
+На рисунке \ref{mxcl_2} приведены методы для добавления лучшей вершины в клику.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def one_missing(self):
+        result = set()
+        for v in self.graph.verticies():
+            if v not in self.clique:
+                k = sum(1 for u in self.clique if self.graph.has_edge(u, v))
+                if len(self.clique) - 1 == k:
+                    result.add(v)
+        return result
+
+    def best_for_delete(self):
+        missing = self.one_missing()
+        d = dict()
+        for v in self.clique:
+            d[v] = sum(1 for u in missing if self.graph.has_edge(v, u))
+        return min(d)
+
+    def delete_best(self):
+        self.clique.remove(self.best_for_delete())
+\end{lstlisting}  
+    \caption{Методы <<one\_missing>>,<<best\_for\_delete>>,<<delete\_best>>}
+    \label{mxcl_4}
+\end{figure} 
+На рисунке \ref{mxcl_4} приведены методы для удаления 
+лучшей вершины из клики.
+\begin{figure}[H] 
+\begin{lstlisting}[language=Python] 
+    def step(self):
+        cand = self.candidates()
+        if len(cand) != 0:
+            self.add_best()
+        else:
+            self.delete_best()
+
+    def find_clique(self, k_ticks):
+        result = self.clique.copy()
+        for _ in range(k_ticks):
+            self.step()
+            if len(self.clique) > len(result):
+                result = self.clique.copy()
+        return result
+\end{lstlisting}  
+    \caption{Реализация методов <<step>> и <<find\_clique>>}
+    \label{mxcl_5}
+\end{figure} 
+На рисунке \ref{mxcl_5} приведены методы для поиска максимальной клики графа.
+
+Данный алгоритм имеет ряд преимуществ, такие как простота и эффективность. К недостаткам можно отнести, то что находит лишь одну 
+максимальную клику.
